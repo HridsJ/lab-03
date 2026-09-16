@@ -120,15 +120,15 @@ fun CityListScreen(
                     Text("Add City")
                 }
 
+            }
+        }
 
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    itemsIndexed(cities) { index, city ->
-                        CityRow(city = city)
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            itemsIndexed(cities) { index, city ->
+                CityRow(city = city)
 
-                        if (index < cities.lastIndex) {
-                            HorizontalDivider()
-                        }
-                    }
+                if (index < cities.lastIndex) {
+                    HorizontalDivider()
                 }
             }
         }
