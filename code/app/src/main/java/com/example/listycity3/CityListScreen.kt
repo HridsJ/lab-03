@@ -1,5 +1,7 @@
 package com.example.listycity3
 
+import android.R.attr.onClick
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.example.listycity3.ui.theme.ListyCity3Theme
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
@@ -30,11 +33,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 
 
 @Composable
-fun CityRow(city: City) {
+fun CityRow(
+    city: City,
+    onClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 16.dp)
+            .clickable() {onClick()}
     ) {
         Text(
             text = city.name,
@@ -55,6 +62,7 @@ fun CityRow(city: City) {
 fun CityListScreen(
     cities: List<City>,
     onAddCity: (City) -> Unit,
+    onUpdateCity: (City, City) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var newCityName by remember { mutableStateOf("") }
@@ -87,7 +95,12 @@ fun CityListScreen(
                 OutlinedTextField(
                     value = newCityName,
                     onValueChange = { newCityName = it },
-                    label = { Text("City") },
+                    label = {
+                        Text(
+                            if (selectedCity != null) "City updated"
+                            else "City"
+                        )
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -96,7 +109,12 @@ fun CityListScreen(
                 OutlinedTextField(
                     value = newProvinceName,
                     onValueChange = { newProvinceName = it },
-                    label = { Text("Province") },
+                    label = {
+                        Text(
+                            if(selectedCity!=null) "Province Updated"
+                            else "Province"
+                        )
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -106,27 +124,50 @@ fun CityListScreen(
                     modifier = Modifier.padding(vertical = 12.dp),
                     onClick = {
                         if (newCityName.isNotBlank() && newProvinceName.isNotBlank()) {
-                            onAddCity(
-                                City(
-                                    name = newCityName,
-                                    province = newProvinceName
+                            //code gives error because selectedCity is var I think
+                            val selectedCityHolder = selectedCity
+                            if (selectedCityHolder != null) {
+                                onUpdateCity(
+                                    selectedCityHolder,
+                                    City(
+                                        name = newCityName,
+                                        province = newProvinceName
+                                    )
                                 )
-                            )
+                                selectedCity = null
+                            } else {
+                                onAddCity(
+                                    City(
+                                        name = newCityName,
+                                        province = newProvinceName
+                                    )
+                                )
+                            }
                             newCityName = ""
                             newProvinceName = ""
                             showAddCityFields = false
                         }
                     }
                 ) {
-                    Text("Add City")
+                    Text(
+                        if (selectedCity!=null) "Update City"
+                        else "Add City"
+                    )
                 }
-
             }
         }
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             itemsIndexed(cities) { index, city ->
-                CityRow(city = city)
+                CityRow(
+                    city = city,
+                    onClick = {
+                        selectedCity = city
+                        newCityName = city.name
+                        newProvinceName = city.province
+                        showAddCityFields = true // + field opens when click a city to edit
+                    }
+                )
 
                 if (index < cities.lastIndex) {
                     HorizontalDivider()
@@ -150,7 +191,8 @@ fun CityListScreenPreview() {
                 City("Vancouver", "BC"),
                 City("Calgary", "AB")
             ),
-            onAddCity = {}
+            onAddCity = {},
+            onUpdateCity = {old, new ->}
         )
     }
 }

@@ -16,5 +16,11 @@ class CityRepository {
         _cities.add(city)
     }
 
-
+    fun updateCity(oldCity: City, newCity: City) {
+        val positionOfCity = _cities.indexOf(oldCity)
+        // -1 means not found
+        if (positionOfCity != -1) {
+            _cities[positionOfCity] = newCity
+        }
+    }
 }
